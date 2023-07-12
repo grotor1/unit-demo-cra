@@ -35,6 +35,9 @@
     "prepare": "husky install"
   },
   "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "npx eslint --fix"
+    ],
     "**/*.{js,jsx,ts,tsx,html,css,json}": [
       "npx prettier --write"
     ]
