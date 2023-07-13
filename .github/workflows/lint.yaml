@@ -16,6 +16,4 @@ jobs:
         run: npm install
       - name: "Run linting"
         run: |
-          commits=${{ github.event.commits }}
-          count=${#commits[@]}
-          npx commitlint --from HEAD~${count} --to HEAD --verbose
+          npx commitlint --from ${{ github.event.before }} --to ${{ github.event.after }} --verbose
