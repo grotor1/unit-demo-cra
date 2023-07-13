@@ -17,6 +17,6 @@ jobs:
       - name: "Run linting"
         run: |
           commits=${{ github.event.commits }}
-          size=${#commits[#]}
+          size=${#commits[@]}
           echo ${size}
           npx commitlint --from ${{ github.event.before }} --to ${{ github.event.after }} --verbose
