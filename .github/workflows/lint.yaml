@@ -7,12 +7,12 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       - name: "Setup Node"
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: "Commits"
+      - name: "Install commit lint"
         run: |
           npm install conventional-changelog-conventionalcommits
           npm install commitlint@latest
@@ -21,4 +21,4 @@ jobs:
           commits=${{ github.event.commits }}
           size=${#commits[@]}
           echo ${size}
-          npx commitlint --from HEAD~1 --to HEAD --verbose
+          npx commitlint --from HEAD~${size} --to HEAD --verbose
