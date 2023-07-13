@@ -1,0 +1,19 @@
+name: Run commitlint on push
+on: push
+jobs:
+  run-commitlin-on-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: "Setup Node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: "Install deps"
+        run: npm install
+      - name: "Run linting"
+        run: |
+          npx commitlint --from ${{ github.event.push.head.sha }}~${{ github.event.push.commits }} --to ${{ github.event.push.head.sha }} --verbose
