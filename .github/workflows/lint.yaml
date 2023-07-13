@@ -16,5 +16,7 @@ jobs:
         run: npm install
       - name: "Run linting"
         run: |
-          echo ${{ github.event.compare }}
+          commits=${{ github.event.commits }}
+          size=${#commits[#]}
+          echo ${size}
           npx commitlint --from ${{ github.event.before }} --to ${{ github.event.after }} --verbose
