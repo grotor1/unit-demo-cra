@@ -16,4 +16,4 @@ jobs:
         run: npm install
       - name: "Run linting"
         run: |
-          npx commitlint --from ${{ github.event.push.head.sha }}~${{ github.event.push.commits }} --to ${{ github.event.push.head.sha }} --verbose
+          npx commitlint --from HEAD~${{ github.event.push.size }} --to HEAD --verbose
