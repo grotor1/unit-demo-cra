@@ -36,6 +36,6 @@ jobs:
           ref: $BRANCH_NAME
           fetch-depth: 0
       - name: "Get diff commits"
-        run: |
-          echo git log $(git describe --abbrev=0 --tags $(git describe --abbrev=0)^)...$(git describe --abbrev=0)
+        run: | 
+          echo git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags ${{ github.ref_name }}^)...${{ github.ref_name }}
 
