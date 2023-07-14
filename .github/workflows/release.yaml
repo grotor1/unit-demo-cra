@@ -91,6 +91,8 @@ jobs:
           update_existing: true
           search_existing: all
   deploy:
+    needs:
+      - run-tests-on-release
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
