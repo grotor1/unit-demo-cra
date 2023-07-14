@@ -73,7 +73,7 @@ jobs:
           CHANGELOG: ${{ needs.create-changelog.outputs.changelog }}
           LINK: ${{ needs.run-tests-on-release.outputs.result-link }}
         with:
-          filename: '.github/templates/release_issue.md'
+          filename: '.github/release_issue.md'
           update_existing: true
           search_existing: all
 
