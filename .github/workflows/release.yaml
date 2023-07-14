@@ -31,7 +31,7 @@ jobs:
     needs: create-release-branch
     steps:
       - name: "Checkout"
-        uses: action/checkout@v3
+        uses: actions/checkout@v3
         with:
           ref: $BRANCH_NAME
       - name: "Get diff commits"
