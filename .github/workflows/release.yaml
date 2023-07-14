@@ -61,7 +61,7 @@ jobs:
           echo "$changelog" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
   create-issue:
-    needs: [ create-changelog, run-tests-on-release ]
+    needs: [ create-changelog ]
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
