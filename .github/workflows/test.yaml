@@ -1,16 +1,8 @@
-name: "Run tests and lint on pr to master"
-
 on:
-  pull_request:
-    branches:
-      - master
-    types:
-      - opened
-      - reopened
-      - synchronize
+  workflow_call:
 
 jobs:
-  run-linting-on-pr:
+  run-linting:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
@@ -23,7 +15,7 @@ jobs:
         run: npm ci
       - name: "Run linting"
         run: npx eslint
-  run-e2e-tests-on-pr:
+  run-e2e-tests:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
@@ -45,7 +37,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-  run-unit-tests-on-pr:
+  run-unit-tests:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"

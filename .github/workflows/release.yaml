@@ -1,0 +1,11 @@
+on:
+  push:
+    tags:
+      - v[0-9]*
+    branches:
+      - '/releases/v[0-9]*'
+
+jobs:
+  run-tests-on-release:
+    uses: ./.github/workflows/test.yaml
+
