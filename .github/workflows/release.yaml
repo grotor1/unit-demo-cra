@@ -71,11 +71,13 @@ jobs:
         if: ${{ github.ref_type == 'tag' }}
         with:
           ref: releases/${{ github.ref_name }}
+          fetch-depth: 0
       - name: "Checkout"
         uses: actions/checkout@v3
         if: ${{ github.ref_type == 'branch' }}
         with:
           ref: ${{ github.ref_name }}
+          fetch-depth: 0
       - name: "Set env"
         run: |
           echo "VERSION=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
@@ -122,6 +124,8 @@ jobs:
       - deploy
       - create-issue
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
       - name: "Close issue"
         run: gh issue close --comment "Close release" "${{ needs.create-issue.outputs.issue-number }}"
         env:
