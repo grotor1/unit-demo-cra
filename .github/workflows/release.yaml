@@ -12,8 +12,8 @@ env:
     releases/${{ github.ref_name }}
 
 jobs:
-  #  run-tests-on-release:
-  #    uses: ./.github/workflows/test.yaml
+  run-tests-on-release:
+    uses: ./.github/workflows/test.yaml
   create-release-branch:
     runs-on: ubuntu-latest
     steps:
@@ -61,8 +61,19 @@ jobs:
           echo "$changelog" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
   create-issue:
-    needs: create-changelog
+    needs: [create-changelog, run-tests-on-release]
     runs-on: ubuntu-latest
     steps:
-      - name: "Echo changelog"
-        run: echo "${{ needs.create-changelog.outputs.changelog }}"
+      - name: "Create issue"
+        uses: JasonEtco/create-an-issue@v2.9.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: git describe --abbrev=0 --tags
+          DATE: git log -1 --format=%ai $(git describe --abbrev=0 --tags)
+          CHANGELOG: ${{ needs.create-changelog.outputs.changelog }}
+          LINK: ${{ needs.run-tests-on-release.outputs.result-link }}
+        with:
+          filename: '.github/templates/release_issue.md'
+          update_existing: true
+          search_existing: all
+
