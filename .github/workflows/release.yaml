@@ -26,7 +26,7 @@ jobs:
           branch: refs/heads/$BRANCH_NAME
   create-changelog:
     env:
-      BRANCH_NAME: ${{ needs.create-release-branch.outputs.branch-name }
+      BRANCH_NAME: ${{ needs.create-release-branch.outputs.branch-name }}
     runs-on: ubuntu-latest
     needs: create-release-branch
     steps:
