@@ -69,13 +69,11 @@ jobs:
         if: ${{ github.ref_type == 'tag' }}
         with:
           ref: releases/${{ github.ref_name }}
-          fetch-depth: 0
       - name: "Checkout"
         uses: actions/checkout@v3
         if: ${{ github.ref_type == 'branch' }}
         with:
           ref: ${{ github.ref_name }}
-          fetch-depth: 0
       - name: "Set env"
         run: |
           echo "VERSION=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
@@ -92,4 +90,24 @@ jobs:
           filename: '.github/release_issue.md'
           update_existing: true
           search_existing: all
-
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          ref: releases/${{ github.ref_name }}
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'branch' }}
+        with:
+          ref: ${{ github.ref_name }}
+      - name: "Build"
+        run: |
+          npm ci
+          npm run build
+      - name: "Deploy"
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
