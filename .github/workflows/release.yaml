@@ -8,8 +8,8 @@ on:
       - 'releases/v[0-9]*'
 
 jobs:
-#  run-tests-on-release:
-#    uses: ./.github/workflows/test.yaml
+  #  run-tests-on-release:
+  #    uses: ./.github/workflows/test.yaml
   create-release-branch:
     runs-on: ubuntu-latest
     steps:
@@ -41,16 +41,14 @@ jobs:
       - name: "Get diff commits"
         if: ${{ github.ref_type == 'tag' }}
         run: |
-          changelog=$(git log --no-merges --pretty=format:"%s%n" $(git describe --abbrev=0 --tags ${{ github.ref_name }}^)...${{ github.ref_name }})
+          changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags ${{ github.ref_name }}^)...${{ github.ref_name }})
           changelog="${changelog//$'%n'/'%0A'}"
           echo "$changelog" >> "$GITHUB_OUTPUT"
       - name: "Get diff commits"
         if: ${{ github.ref_type == 'branch' }}
         run: |
           changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags)^...HEAD)
-          changelog="${changelog//'%'/'%25'}"
-          changelog="${changelog//$'\n'/'%0A'}"
-          changelog="${changelog//$'\r'/'%0D'}"
+          changelog="${changelog//$'%n'/'%0A'}"
           echo "$changelog" >> "$GITHUB_OUTPUT"
   create-issue:
     needs: create-changelog
