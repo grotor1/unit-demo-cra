@@ -11,20 +11,15 @@ jobs:
   run-tests-on-release:
     uses: ./.github/workflows/test.yaml
   create-release-branch:
-    env:
-      BRANCH_NAME: releases/${{ github.ref_name }}
     runs-on: ubuntu-latest
-    outputs:
-      branch-name: "$BRANCH_NAME"
     steps:
-      - run: echo $BRANCH_NAME
       - name: "Create release branch"
         if: ${{ github.ref_type == 'tag' }}
         uses: peterjgrainger/action-create-branch@v2.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          branch: refs/heads/"$BRANCH_NAME"
+          branch: refs/heads/releases/${{ github.ref_name }}
   create-changelog:
     env:
       BRANCH_NAME: ${{ needs.create-release-branch.outputs.branch-name }}
@@ -35,8 +30,15 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'tag' }}
         with:
-          ref: $BRANCH_NAME
+          ref: releases/${{ github.ref_name }}
+          fetch-depth: 0
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'branch' }}
+        with:
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
       - name: "Get diff commits"
         if: ${{ github.ref_type == 'tag' }}
