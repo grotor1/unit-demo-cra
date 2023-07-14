@@ -12,3 +12,8 @@ on:
 jobs:
   run-tests-and-lint-on-pr:
     uses: ./.github/workflows/test.yaml
+  test-job:
+    needs: run-tests-and-lint-on-pr
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ needs.run-tests-and-lint-on-pr.outputs.result }}

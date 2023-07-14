@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    outputs:
+      result-link:
+        description: "Link to checks result"
+        value: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
 
 jobs:
   run-linting:
