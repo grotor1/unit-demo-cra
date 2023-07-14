@@ -63,6 +63,8 @@ jobs:
   create-issue:
     needs: [ create-changelog, run-tests-on-release ]
     runs-on: ubuntu-latest
+    outputs:
+      issue-number: ${{ steps.issue-create.outputs.number }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
@@ -80,6 +82,7 @@ jobs:
           echo "DATE=$(git log -1 --format=%ai $(git describe --abbrev=0 --tags))" >> $GITHUB_ENV
       - name: "Create issue"
         uses: JasonEtco/create-an-issue@v2.9.1
+        id: issue-create
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.VERSION }}
@@ -113,3 +116,13 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
+  close-issue:
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+      - create-issue
+    steps:
+      - name: "Close issue"
+        run: gh issue close --comment "Close release" "${{ needs.create-issue.outputs.issue-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
