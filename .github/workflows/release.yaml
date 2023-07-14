@@ -42,14 +42,18 @@ jobs:
         if: ${{ github.ref_type == 'tag' }}
         run: |
           changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags ${{ github.ref_name }}^)...${{ github.ref_name }})
-          changelog="${changelog//$'%n'/'%0A'}"
-          echo "$changelog" >> "$GITHUB_OUTPUT"
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "changelog<<$EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
       - name: "Get diff commits"
         if: ${{ github.ref_type == 'branch' }}
         run: |
           changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags)^...HEAD)
-          changelog="${changelog//$'%n'/'%0A'}"
-          echo "$changelog" >> "$GITHUB_OUTPUT"
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "changelog<<$EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
   create-issue:
     needs: create-changelog
     runs-on: ubuntu-latest
