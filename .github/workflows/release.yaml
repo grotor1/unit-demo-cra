@@ -15,7 +15,7 @@ jobs:
       BRANCH_NAME: releases/${{ github.ref_name }}
     runs-on: ubuntu-latest
     outputs:
-      branch-name: $BRANCH_NAME
+      branch-name: "$BRANCH_NAME"
     steps:
       - name: "Create release branch"
         if: ${{ github.ref_type == 'tag' }}
@@ -23,7 +23,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          branch: refs/heads/$BRANCH_NAME
+          branch: refs/heads/"$BRANCH_NAME"
   create-changelog:
     env:
       BRANCH_NAME: ${{ needs.create-release-branch.outputs.branch-name }}
