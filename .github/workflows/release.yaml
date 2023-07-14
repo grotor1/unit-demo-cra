@@ -1,0 +1,132 @@
+name: 'Create or hotfix release'
+
+on:
+  push:
+    tags:
+      - v[0-9]*
+    branches:
+      - 'releases/v[0-9]*'
+
+env:
+  BRANCH_NAME:
+    releases/${{ github.ref_name }}
+
+jobs:
+  run-tests-on-release:
+    uses: ./.github/workflows/test.yaml
+  create-release-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Create release branch"
+        if: ${{ github.ref_type == 'tag' }}
+        uses: peterjgrainger/action-create-branch@v2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: refs/heads/$BRANCH_NAME
+  create-changelog:
+    runs-on: ubuntu-latest
+    needs: create-release-branch
+    outputs:
+      changelog: ${{ github.ref_type == 'tag' && steps.tag_diff.outputs.changelogOut || steps.branch_diff.outputs.changelogOut }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          ref: releases/${{ github.ref_name }}
+          fetch-depth: 0
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'branch' }}
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - name: "Get diff commits"
+        id: tag_diff
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags ${{ github.ref_name }}^)...${{ github.ref_name }})
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "changelogOut<<$EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+      - name: "Get diff commits"
+        if: ${{ github.ref_type == 'branch' }}
+        id: branch_diff
+        run: |
+          changelog=$(git log --no-merges --pretty=format:"%s" $(git describe --abbrev=0 --tags)^...HEAD)
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "changelogOut<<$EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+  create-issue:
+    needs: [ create-changelog, run-tests-on-release ]
+    runs-on: ubuntu-latest
+    outputs:
+      issue-number: ${{ steps.issue-create.outputs.number }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          ref: releases/${{ github.ref_name }}
+          fetch-depth: 0
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'branch' }}
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - name: "Set env"
+        run: |
+          echo "VERSION=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+          echo "DATE=$(git log -1 --format=%ai $(git describe --abbrev=0 --tags))" >> $GITHUB_ENV
+      - name: "Create issue"
+        uses: JasonEtco/create-an-issue@v2.9.1
+        id: issue-create
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+          DATE: ${{ env.DATE }}
+          CHANGELOG: ${{ needs.create-changelog.outputs.changelog }}
+          LINK: ${{ needs.run-tests-on-release.outputs.result-link }}
+        with:
+          filename: '.github/release_issue.md'
+          update_existing: true
+          search_existing: all
+  deploy:
+    needs:
+      - run-tests-on-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          ref: releases/${{ github.ref_name }}
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        if: ${{ github.ref_type == 'branch' }}
+        with:
+          ref: ${{ github.ref_name }}
+      - name: "Build"
+        run: |
+          npm ci
+          npm run build
+      - name: "Deploy"
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+  close-issue:
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+      - create-issue
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: "Close issue"
+        run: gh issue close --comment "Close release" "${{ needs.create-issue.outputs.issue-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

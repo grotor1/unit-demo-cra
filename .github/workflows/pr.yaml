@@ -1,0 +1,14 @@
+name: "Run tests and lint on pr to master"
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  run-tests-and-lint-on-pr:
+    uses: ./.github/workflows/test.yaml
