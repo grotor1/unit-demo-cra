@@ -1,3 +1,5 @@
+name: 'Create or hotfix release'
+
 on:
   push:
     tags:
@@ -9,7 +11,11 @@ jobs:
   run-tests-on-release:
     uses: ./.github/workflows/test.yaml
   create-release-branch:
+    env:
+        BRANCH_NAME: releases/${{ github.ref_name }}
     runs-on: ubuntu-latest
+    outputs:
+      branch-name: $BRANCH_NAME
     steps:
       - name: "Create release branch"
         if: ${{ github.ref_type == 'tag' }}
@@ -17,4 +23,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          branch: refs/heads/releases/${{ github.ref_name }}
+          branch: refs/heads/$BRANCH_NAME
+  create-changelog:
+    env:
+      BRANCH_NAME: ${{ needs.create-release-branch.outputs.branch-name }
+    runs-on: ubuntu-latest
+    needs: create-release-branch
+    steps:
+      - name: "Checkout"
+        uses: action/checkout@v3
+        with:
+          ref: $BRANCH_NAME
+      - name: "Get diff commits"
+        run: |
+          echo git log $(git describe --abbrev=0 --tags $(git describe --abbrev=0)^)...$(git describe --abbrev=0)
+
