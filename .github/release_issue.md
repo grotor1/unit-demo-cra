@@ -5,7 +5,7 @@ labels: RELEASE
 ## Author: {{ payload.sender.login }}
 ## Date: {{ env.DATE }}
 
-#### {{ env.CHANGELOG }}
+{{ env.CHANGELOG }}
 
 ### Link to test result: {{ env.LINK }}
 

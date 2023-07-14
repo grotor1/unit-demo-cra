@@ -76,14 +76,18 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+      - name: "Set env"
+        run: |
+          echo "VERSION=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
+          echo "DATE=$(git log -1 --format=%ai $(git describe --abbrev=0 --tags))" >> $GITHUB_ENV
       - name: "Create issue"
         uses: JasonEtco/create-an-issue@v2.9.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: git describe --abbrev=0 --tags
-          DATE: git log -1 --format=%ai $(git describe --abbrev=0 --tags)
+          VERSION: ${{ env.VERSION }}
+          DATE: ${{ env.DATE }}
           CHANGELOG: ${{ needs.create-changelog.outputs.changelog }}
-        #          LINK: ${{ needs.run-tests-on-release.outputs.result-link }}
+          LINK: ${{ needs.run-tests-on-release.outputs.result-link }}
         with:
           filename: '.github/release_issue.md'
           update_existing: true
