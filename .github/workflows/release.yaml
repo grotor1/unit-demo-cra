@@ -12,8 +12,8 @@ env:
     releases/${{ github.ref_name }}
 
 jobs:
-  #  run-tests-on-release:
-  #    uses: ./.github/workflows/test.yaml
+  run-tests-on-release:
+    uses: ./.github/workflows/test.yaml
   create-release-branch:
     runs-on: ubuntu-latest
     steps:
@@ -61,7 +61,7 @@ jobs:
           echo "$changelog" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
   create-issue:
-    needs: [ create-changelog ]
+    needs: [ create-changelog, run-tests-on-release ]
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
